@@ -1,0 +1,21 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: load-to-mongo-job
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      containers:
+      - name: load-to-mongo
+        image: pyspark:latest
+        imagePullPolicy: Never
+        command: ["python3", "/app/load_to_mongo.py"]
+        volumeMounts:
+        - name: pipeline-data
+          mountPath: /app/ingestion/processed_data
+      volumes:
+      - name: pipeline-data
+        persistentVolumeClaim:
+          claimName: pipeline-data
+      restartPolicy: Never

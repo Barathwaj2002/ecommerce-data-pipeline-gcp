@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pyspark-job
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      containers:
+      - name: pyspark
+        image: pyspark:latest
+        imagePullPolicy: Never
+        command: ["/bin/sh", "-c"]
+        args:
+          - "python3 /app/pyspark_advanced_03.py && python3 /app/customer_rfm_02.py"
+        env:
+        - name: PYSPARK_PYTHON
+          value: "/usr/bin/python3"
+        - name: PYSPARK_DRIVER_PYTHON
+          value: "/usr/bin/python3"
+        volumeMounts:
+        - name: pipeline-data
+          mountPath: /app/ingestion/processed_data
+      volumes:
+      - name: pipeline-data
+        persistentVolumeClaim:
+          claimName: pipeline-data
+      restartPolicy: Never
+
+

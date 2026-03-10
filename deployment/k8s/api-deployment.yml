@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecommerce-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ecommerce-api
+  template:
+    metadata:
+      labels:
+        app: ecommerce-api
+    spec:
+      containers:
+      - name: ecommerce-api
+        image: ecommerce-api:spring
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8081
+        env:
+        - name: SPRINT_DATA_MONGODB_URI
+          value: mongodb://root:example@mongo:27017/ecommerce?authSource=admin
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ecommerce-api
+spec:
+  selector:
+    app: ecommerce-api
+  ports:
+  - protocol: TCP
+    port: 8081
+    targetPort: 8081
+  type: LoadBalancer

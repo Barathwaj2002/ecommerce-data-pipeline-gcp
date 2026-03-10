@@ -1,0 +1,102 @@
+so we have 6 yml files for storage, job and deployment in total. 
+1 yml files for storage (pvc.yml)
+2 yml files for deployment (api-deployment.yml, mongo-deployment.yml)
+3 yml files for job (ingestion-job.yml, pyspark-job.yml, load-to-mongo.yml)
+
+Now we will break down each file and explain
+
+1. Storage
+pvc.yml - this is used to creating a PersistentVolumeClaim request to the pod.
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pipeline-data
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 500Mi
+
+apiVersion - this is to declare which group of k8s api and its version to be used (v1)
+kind - this is to declare what type of k8s resource we need (Job, Deployment, Service, ConfigMap, Secret, PV & PVC, etc...)
+metadata - for naming and information details for the file
+spec - the specification of the kind
+accessModes - How the volume can be accessed (how and how many nodes can access) (ReadWriteOnce (RWO), ReadOnlyMany (ROX), ReadWriteMany (RWX))
+resources - it has 2 parameters generally (requests and limits). for storage it is storage inside requests (PVC) and no limits. for a normal PV capacity comes directly under spec. there is no requests or limits
+            for pods and containers, it has CPU and memory in both resources and limits
+
+Note - in local it doesn't matter what we give between ReadWriteOnly and ReadWriteMany since the local is only one pod. It restricts the pod access and not the container access. but if we give ReadOnlyMany, it will restrict the access of local pod too. 
+       So even though we jave 3 different job pods, all come under same node as we are running it in local.
+
+Deployment
+api-deployment.yml - a deployment type used to deploy spring image built already for extracting data from mongo using mongo interface
+mongo-deployment.yml a deployment type used to deploy mongodb with ClusterIP (default). we can access it through the ports and mongo URI mentioned.
+
+deployment ref:
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecommerce-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ecommerce-api
+  template:
+    metadata:
+      labels:
+        app: ecommerce-api
+    spec:
+      containers:
+      - name: ecommerce-api
+        image: ecommerce-api:spring
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8081
+        env:
+        - name: SPRINT_DATA_MONGODB_URI
+          value: mongodb://root:example@mongo:27017/ecommerce?authSource=admin
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ecommerce-api
+spec:
+  type: LoadBalancer
+  selector:
+    app: ecommerce-api
+  ports:
+  - protocol: TCP
+    port: 8081
+    targetPort: 8081
+
+Note: Never means kubelet only looks in the local Docker daemon. Always means always pull from registry. IfNotPresent means use local if exists, otherwise pull.
+      We use Never because the image was built directly into minikube's Docker daemon using eval $(minikube docker-env). so this is our own image with own specs.
+      To access the api outside, use port-forwarding as LoadBalancer has not been established with cloud yet. we can use "kubectl port-forward svc/<service-name> port:port". 
+      Port forwarding is used since we are having the project in wsl2 and have to get output in windows. windows can't reach minikube's internal IP which is binded to wsl2 by
+      minikube service --url
+
+Deployment:
+apiVersion - this is to declare which group of k8s api and its version to be used (to see all api groups use kubectl api-groups)
+kind - here its the deployment type that is stateless in our case (no volumes attached and memory is deleted once pod is destroyed). however a mongo deployment should be always stateful to avoid data loss.
+metadata - for naming and information details for the file
+spec - the specification of the kind
+replicas - how much similar spec pods should be deployed
+selector - to select the pod and apply the changes (if any). it has 2 options: matchLabels, matchExpressions. both can be used or only one.
+           matchExpressions again have 3 option (key, value, operator (In,  NotIn, Exists, DoesNotExist))
+template - defines the pod with metadata and specs of it including the volumeMounts and mountPath if applicable
+metadata.labels: this must always exactly match the selector as this is how the target is identified for rolling updates, scaling, config changes etc...
+template.spec - this is used for specifications of the pod. we can mention containers, volumes, initContainers (first container to be executed), serviceAccountName, restartPolicy (should it restart if failed or completed), etc...
+containers - used to define the container spec. like its name, image details, imagePullPolicy (to get it from registry(Docker Hub) or from local Docker which we built manually),
+             ports (containerPort (mandatory), name, protocol), env (environment variable of containers. has name and value as fields)
+
+Service:
+kind - here its Service implying that its used for stable access (network specs), load balancing across pods, decoupling btw client and pod lifecycle (IP change every lifecycle) using DNS name and ClusterIP.
+spec.type - here its LoadBalancing(provided by cloud providers) for external access (cloud not yet integrated). other options include NodePort, ClusterIP, ExternalName.
+ports - has protocol, port, targetPort for LoadBalancer. for NodePort, nodePort instead of protocol. for ClusterIP, only port and targetPort. for externalName, only externalName and no ports
+
+Note: LoadBalancer stays in pending state for external IP since there is no cloud integration. but the app can be accessed via "minikube service <service_name> --url". this creates a tunnel that gives the url connecting to the node port
+      which is automatically assigned by k8s to every deployment. 
+      mongo can be connected by other api pods via mongo uri. like mongodb://<username>:<password>@<service_name>:27017/<db>?authSource=<role>
