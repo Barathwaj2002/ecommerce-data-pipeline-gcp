@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airflow-webserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: airflow-webserver
+  template:
+    metadata:
+      labels:
+        app: airflow-webserver
+    spec:
+      serviceAccountName: airflow-sa
+      containers:
+      - name: airflow
+        image: airflow-custom:latest
+        imagePullPolicy: Never
+        command: ["airflow", "standalone"]
+        ports:
+        - containerPort: 8080
+        env:
+        - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+          value: sqlite:////airflow-db/airflow.db
+        - name: AIRFLOW__CORE__LOAD_EXAMPLES
+          value: "false"
+        - name: AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_ALL_ADMINS
+          value: "true"
+        - name: AIRFLOW__CORE__SECRET_KEY
+          value: "my-static-secret-key-for-local-dev"
+        - name: AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL
+          value: "30"
+        volumeMounts:
+        - name: airflow-db
+          mountPath: /airflow-db
+      volumes:
+      - name: airflow-db
+        emptyDir: {} 
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: airflow-webserver
+spec:
+  selector:
+    app: airflow-webserver
+  ports:
+  - port: 8080
+    targetPort: 8080
+  type: LoadBalancer

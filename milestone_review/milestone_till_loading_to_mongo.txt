@@ -148,3 +148,4 @@ spec.template.containers.command - command to be executed after creating the pod
 spec.template.containers.volumeMounts - used to mount the volume identifying by its name and mounting it in the mountPath of the pod
 spec.template.spec.volumes - name of the volume to be initialized and its specs
 spec.template.spec.restartPolicy - Never, OnFailure allowed for Job and CronJob. For Deployment, Always (no need to mention as it is the only option)
+
