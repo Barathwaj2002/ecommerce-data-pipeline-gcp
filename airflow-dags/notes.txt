@@ -1,0 +1,13 @@
+FileSensor requires fs_conn_id pointing to a filesystem connection. Default is fs_default. 
+Create with airflow connections add fs_default --conn-type fs for local filesystem. 
+Connection abstraction allows swapping local → cloud storage without DAG changes.
+
+Airflow connections = explicit over implicit. 
+No defaults shipped because prod environments vary. 
+Every external system needs a named connection. 
+fs_default for local filesystem, google_cloud_default for GCP, etc.
+
+Sensor modes:
+poke - occupies a worker slot for entire duration. Simple but wastes resources if waiting long.
+reschedule - releases worker between pokes, task goes back to scheduler. Better for long waits.
+deferrable - hands off to Triggerer process entirely, zero worker occupancy. Production recommended for long-running sensors. Requires async-compatible sensor implementation.
