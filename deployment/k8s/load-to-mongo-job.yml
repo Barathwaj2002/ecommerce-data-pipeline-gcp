@@ -1,13 +1,13 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: load-to-mongo-job
+  name: load-mongo-job
 spec:
   backoffLimit: 0
   template:
     spec:
       containers:
-      - name: load-to-mongo
+      - name: load-mongo
         image: pyspark:latest
         imagePullPolicy: Never
         command: ["python3", "/app/load_to_mongo.py"]

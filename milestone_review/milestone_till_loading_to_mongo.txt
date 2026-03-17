@@ -25,7 +25,7 @@ kind - this is to declare what type of k8s resource we need (Job, Deployment, Se
 metadata - for naming and information details for the file
 spec - the specification of the kind
 accessModes - How the volume can be accessed (how and how many nodes can access) (ReadWriteOnce (RWO), ReadOnlyMany (ROX), ReadWriteMany (RWX))
-resources - it has 2 parameters generally (requests and limits). for storage it is storage inside requests (PVC) and no limits. for a normal PV capacity comes directly under spec. there is no requests or limits
+resources - it has 2 parameters generally (requests and limits). for storage it is storage inside requests (PVC) and no limits. for a normal PV, capacity comes directly under spec. there is no requests or limits
             for pods and containers, it has CPU and memory in both resources and limits
 
 Note - in local it doesn't matter what we give between ReadWriteOnly and ReadWriteMany since the local is only one pod. It restricts the pod access and not the container access. but if we give ReadOnlyMany, it will restrict the access of local pod too. 
@@ -73,7 +73,7 @@ spec:
     port: 8081
     targetPort: 8081
 
-Note: Never means kubelet only looks in the local Docker daemon. Always means always pull from registry. IfNotPresent means use local if exists, otherwise pull.
+Note: Never in imagePullPolicy means kubelet only looks in the local Docker daemon. Always means always pull from registry. IfNotPresent means use local if exists, otherwise pull.
       We use Never because the image was built directly into minikube's Docker daemon using eval $(minikube docker-env). so this is our own image with own specs.
       To access the api outside, use port-forwarding as LoadBalancer has not been established with cloud yet. we can use "kubectl port-forward svc/<service-name> port:port". 
       Port forwarding is used since we are having the project in wsl2 and have to get output in windows. windows can't reach minikube's internal IP which is binded to wsl2 by

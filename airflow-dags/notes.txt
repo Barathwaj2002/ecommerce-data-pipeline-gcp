@@ -11,3 +11,45 @@ Sensor modes:
 poke - occupies a worker slot for entire duration. Simple but wastes resources if waiting long.
 reschedule - releases worker between pokes, task goes back to scheduler. Better for long waits.
 deferrable - hands off to Triggerer process entirely, zero worker occupancy. Production recommended for long-running sensors. Requires async-compatible sensor implementation.
+
+Backfill:
+It is like a manual catchup that should be triggered manually.
+
+Pool:
+It is used to limit running concurrent tasks to a n number. 
+
+Variable:
+its like env variables for airflow. we can set it in the airflow and use it in the dags using Variables.get(var_name)
+
+Connection:
+Connection is used to create connection between airflow and the target using login details including port number.
+
+Qns:
+What's the difference between backfill and setting catchup=True?
+catchup is automatic run of missed dag schedules due to unavailability of server. 
+backfills is manual version of the same except that we can also control the date range of missed dags and exclude some dates if required.
+
+Pool size is 2 but you have 3 tasks. What happens to the 3rd task?
+First 2 tasks gets executed and 3rd one will be in the queue.after a slot gets freed, the queued up gets executed.
+
+Why use Variables instead of hardcoding values or using env vars?
+when multiple dags are used we can give the reference in the dag and can change the value externally by changing it. it will affect all the usage of the variable names.
+Calude ans: Variables are runtime-configurable — change them in UI without redeploying. Env vars need a pod restart. Variables are also encrypted if marked sensitive, and accessible to all DAGs without rebuilding the image.
+
+What's the difference between a Variable and a Connection in Airflow?
+both are totally different. variable is like env variables. connection is used to connect the airflow with a target which can be mentioned in fs_conn_id. 
+Claude ans: Variable = key-value config store. For simple values like batch sizes, URIs, feature flags. Connection = structured credentials store with typed fields (host, port, login, password, schema). 
+            Operators and hooks use connections via conn_id to authenticate with external systems. You'd use a Variable for a config value, a Connection for authenticating to a database or cloud service.
+
+What's the advantage of dynamic task mapping over hardcoding 3 separate tasks?
+if there are high n number of tasks it is very time consuming and inefficient to hardcode everything. dynamic task make more sense here.
+Claude addition: Also the number of tasks isn't known at code-write time. 
+                 For example, if you're processing files landing in S3, you don't know how many files will arrive each day. 
+                 Dynamic mapping generates tasks at runtime based on actual data — 3 files = 3 tasks, 50 files = 50 tasks. Hardcoding can't handle that.
+
+Where would on_failure_callback send alerts in a real production pipeline?
+In a prod, it would send to the contact point we have configured in the connections. like email, slack, etc...
+
+Can individual tasks override default_args?
+yes. default args will be the default args for all the child tasks/task_group of the dag. It can be overrridden by specifying the
+desired setting inside the task decorator.
