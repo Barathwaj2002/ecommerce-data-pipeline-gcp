@@ -1,0 +1,23 @@
+In GCS there are no real folders — only buckets and blobs. 
+What looks like a folder raw/online_retail.csv is just a blob with a / in its name. 
+GCS uses flat namespace, folders are just a UI convenience.
+
+GCP trial accounts have CPU quota limits per region — default is often 8 vCPUs. 
+Dataproc cluster creation fails silently or with cryptic errors if quota exceeded. 
+Check IAM & Admin → Quotas & System Limits, filter by 'CPUS' for your region. 
+Upgrade machine type or reduce cores to fit within quota.
+
+What is a Dataproc cluster vs a standalone Spark installation?
+Dataproc cluster is a managed service by gcp where everything from cpu allocation to scaling and everything is automatic. In standalone spark installation, everything is manual and infra is also managed by us (physical infra) and it can cause high cost and less reliability. 
+Dataproc also has native GCS connector built in — no extra config needed to read/write gs:// paths from Spark. Standalone Spark needs manual connector setup
+
+Why --single-node for dev and not in production?
+I tried the single node method and it hit memory pressure. and btw now there are limits in the cpu allocation for trial accounts and it doesn't show up explicitly. i struggled lot of hours on this (cluster was not creating) and finally found while checking the quotas & system limits in IAM & Admin page (checked with help of chatgpt). then i created with e2-standard4. now it runs.
+GCP free trial has CPU quota limits per region — default is often 8 vCPUs. n1-standard-2 single-node needs 2, e2-standard-4 needs 4. Check IAM & Admin → Quotas if cluster creation fails silently.
+
+What happens to the cluster after the job finishes — is it still running?
+the cluster is still running and ready for upcoming jobs. 
+Dataproc clusters keep running and billing even when idle. In production use ephemeral clusters — create cluster, run job, delete cluster. Or use Dataproc Serverless which auto-provisions and tears down
+
+Why is this better than running PySpark locally?
+for scaling purposes and automatic installations and also reliable cloud storage access, it is lot better than local. but it does have some latency issues while working so it looks little slower (maybe due to trial account or slow internet idk)

@@ -13,14 +13,15 @@ default_args={
     'on_failure_callback': alert_on_failure
 }
 
-@dag(dag_id="py_op_seq", schedule="@daily",start_date=datetime.now() - timedelta(days=7),catchup=False, default_args=default_args)
+@dag(dag_id="py_op_seq", schedule="@daily",start_date=datetime.now() - timedelta(days=7),catchup=False, default_args=default_args, max_active_runs=1, max_active_tasks=2)
 def python_operators():
     @task(task_id="print_1")
     def print1():
         print("print1")
     @task(task_id="print_2")
     def print2():
-        raise Exception("Simulated Failure")
+        # raise Exception("Simulated Failure")
+        print("success")
     @task(task_id="print_3")
     def print3():
         print("print3")

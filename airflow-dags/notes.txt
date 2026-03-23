@@ -53,3 +53,69 @@ In a prod, it would send to the contact point we have configured in the connecti
 Can individual tasks override default_args?
 yes. default args will be the default args for all the child tasks/task_group of the dag. It can be overrridden by specifying the
 desired setting inside the task decorator.
+
+
+Additional Note: Airflow standalone runs scheduler, api-server, dag-processor, and triggerer as subprocesses. If scheduler subprocess crashes, tasks queue but never execute. 
+                 Symptom: tasks stuck in queued state indefinitely. 
+                 Fix: check logs, restart deployment or manually run airflow scheduler. 
+                 In production this is handled by separate Deployment for each component with its own restartPolicy
+
+ When would you use TriggerDagRunOperator vs just putting everything in one DAG?
+ putting everything in one dag is inefficient, not a best practice, not clear to new people accessing and also can be repititive when needed to triggered externally from many other dags.
+
+ What's the difference between TriggerDagRunOperator and Datasets for DAG dependencies?
+ TriggerDagRunOperator is used to trigger another dags using their dag id and very explicitly. just name the other dag and enough.
+ meanwhile the Datasets rely on data on the datasets. like if there are 2 dags where a dag writes data in a location and another dag is made to depend on that location,
+ the 2nd dag will get triggered whenever the first dag writes the data. the dag connection is not explicitly delared rather it depends on a data change in a location (url or file path)
+
+What's the difference between max_active_runs and max_active_tasks?
+max_active_runs control how much number of runs of a single dag can happen simultaneously. like if it is 1, even if we trigger multiple time at same time, it will queue everything and run one by one.
+max active_tasks control the number of tasks running inside the dag at the same time. its a bit of useless if the dag only contain sequential execution of tasks. but when in parallel, it can control how much of them can run at same time.
+
+When would you set max_active_runs=1 in production?
+when the dag execute a large operation and sensitive as i don't want to hit the overhead of the pod capacity.
+Claude tighteing: max_active_runs=1 in production when: 
+                    (1) each run depends on the previous run completing first — like a daily aggregation where run N must finish before run N+1 starts. 
+                    (2) pipeline writes to a shared resource like a database table or PVC — concurrent runs would cause data conflicts. 
+                    (3) resource-intensive jobs where running two simultaneously would overwhelm the cluster.
+
+What is the Airflow executor and what does LocalExecutor mean?
+Airflow executor manages the airflow things. and which dag to run when... while getting the dags from the scheduler.
+localexecutor manages how to execute the dags. if it is assigned a dag by the scheduler(airflow executor), then it will get the processes to do the task.
+Claude's tightening: Executor determines HOW tasks are executed — not which or when, that's the scheduler's job. 
+                     LocalExecutor runs tasks as subprocesses on the same machine as the scheduler. 
+                     Other executors: CeleryExecutor distributes tasks across multiple worker machines, KubernetesExecutor spins up a new pod per task. 
+                     LocalExecutor is fine for single-node dev but won't scale in production."
+
+What's the difference between a DAG and a Task in Airflow's data model?
+DAG is the highest level of a dag. there can be one or multiple dags in a file but each dag will be unique with a group of tasks/task_group inside it. dag id is the main identity used to run the dag. 
+Tasks come under the dag. there can be multiple tasks/task groups but each should have unique id. after defining all the tasks, they should be called in the desired order using >> or << for sequential run.
+and just t1=task_id1 t2=task_id2 for parallel run. or just >>, << and [task_id1, task_id2, etc] for mixed runs
+
+If a task has retries=2 and fails 3 times, what state does it end in?
+it ends in the failed state. the retries is apart from the initial run so total failure is 3 times including initial run and retries.
+
+What does poke_interval mean in a sensor?
+it is the time interval of sensor checking for the desired condition in the corresponding location/dag.
+
+Why does Airflow need a metadata database?
+it need metadata dbs for storing details of the dag including the scheduling details, ids, history of dag runs, etc...
+
+What is WRITE_TRUNCATE vs WRITE_APPEND in BigQuery load?
+WRITE_TRUNCATE will delete old data and insert the new data (best for rebuilding).
+WRITE_APPEND will add the new data below the old data (best for incremental updates).
+
+What does autodetect=True do and when would you NOT use it?
+its just another name for inferSchema. it will take first row as column names if given True. if there is no column names and only data, we can avoid it.
+CA: What it actually does is sample the data and infer column names and data types automatically. You'd turn it off when:
+You want strict schema enforcement — autodetect might guess wrong types
+You have a predefined schema you want to enforce
+Data has inconsistent types across rows that would confuse autodetect
+
+Why do we use /* at the end of the GCS path?
+to get all the files from that path. in our case, we used parquet. parquet will use many small files to store content. so we used it
+
+What is the difference between BigQuery and a traditional database like PostgreSQL?
+since the bq is cloud native, it is easily and automatically scalable and can handle petabytes of data without any issues. 
+traditional DBs often limited by hardware in premises and can handle normal queries with limited data.
+CA: BigQuery is columnar storage — optimized for analytical queries scanning millions of rows on few columns. PostgreSQL is row storage — optimized for transactional queries fetching complete rows. This is why BigQuery is fast for SELECT SUM(revenue) FROM table but PostgreSQL is better for SELECT * FROM orders WHERE id=123
