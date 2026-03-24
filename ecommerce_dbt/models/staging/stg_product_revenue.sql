@@ -1,7 +1,7 @@
 select
-	Country,
+	{{ clean_string('Country') }} as Country,
 	StockCode,
-	Description,
+	{{ clean_string('Description') }} as Description,
 	CustomerTier,
 	Round(TotalRevenue,2) as TotalRevenue,
 	OrderCount,

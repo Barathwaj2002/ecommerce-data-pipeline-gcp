@@ -17,3 +17,30 @@ dbt view is a temporary table — not stored, queries relevant tables again on e
 Why does dbt separate staging models from mart models?
 Staging creates models from source using source(). Mart creates models from staging using ref(). That's why there is only source() in staging and only ref() in mart.
 *This separation means if the source table changes, you only update the staging model. All mart models that ref() staging automatically get the fix. Without staging, you'd update every mart model individually.
+
+When would you use a macro vs just writing the SQL inline?
+macro is like a function in sql but with only one input. it gets an input and outputs an output. it can be used for standardizing columns or doing specific calculation on it.
+*Macro can take multiple inputs, not just one. Main use case is DRY principle — write once, use everywhere. If the logic changes, update the macro and all models using it update automatically. Use macro when the same SQL pattern repeats across 3+ models.
+
+What is SCD Type 2 and why does it matter?
+It tracks the changes done to a table by 2 methods (timestamp and check) with help of flag columns created by it called dbt_valid_from, dbt_valid_to, dbt_updated_at and an id for it dbt_scd_id.
+instead of deleting the deleted records, it just marks them as invalid. so it is possible to rollback unintended changes.
+*Matters for analytics because business questions are often historical — 'what was this customer's spend 6 months ago?' Without SCD2 you'd only have current values and lose history forever.
+
+What do dbt_valid_from and dbt_valid_to columns represent?
+it tell how from when to when the particular row was present in the table.
+*dbt_valid_to = NULL means the record is currently active. That's how you query current state: WHERE dbt_valid_to IS NULL.
+
+What's the difference between strategy='timestamp' and strategy='check'?
+timestamp uses updated_at column to get the latest values and mark if its valid or not. if there is a change, it inserts a newer version.
+check uses check field in the snapshot file and check the mentioned columns for changes ('all' for all columns)
+both updates the dbt_valid_from, dbt_valid_to columns for version history
+*dbt build = dbt seed + dbt run + dbt snapshot + dbt test in dependency order. It's the production command — single command to execute and validate the entire pipeline.
+
+What is the difference between dbt run, dbt test, and dbt build?
+dbt run: runs the table, incrementals, view.
+dbt test: only runs the test getting the configs of it from multiple sources like sources.yml(source tests), schema.yml (source tests), files inside the tests folder (singluar test), behaviour of it controlled from dbt_project.yml and yml files from models folder as main source. 
+*dbt build = dbt seed + dbt run + dbt snapshot + dbt test in dependency order. It's the production command — single command to execute and validate the entire pipeline.
+
+When would you use seeds vs loading through pipeline?"
+Seeds are for small static reference data that changes rarely like country codes, tier mappings, config tables. Max a few thousand rows. Anything larger or frequently updated should go through your pipeline. Seeds are version controlled in git which is their key advantage. the reference data is part of your codebase.
