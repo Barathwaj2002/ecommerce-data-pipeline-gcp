@@ -35,3 +35,4 @@ CA: BigQuery charges by bytes scanned. Partitioning reduces bytes scanned by ski
 
 What is clustering in BigQuery and how is it different from partitioning?
 it organize data inside each partition with respect to any column other than partitioned one. it will lead to having similar values in a column of a partition and sort in a way that are closely similar values leading to faster search and reduced power consumption (cheaper)
+

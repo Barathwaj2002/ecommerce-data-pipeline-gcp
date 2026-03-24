@@ -1,0 +1,8 @@
+version: 2
+sources:
+  - name: ecommerce_data
+    project: ecommerce-pipeline-490613
+    dataset: ecommerce_data
+    tables:
+      - name: product_revenue
+      - name: customer_rfm

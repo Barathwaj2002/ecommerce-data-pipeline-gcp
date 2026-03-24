@@ -1,0 +1,19 @@
+What is the difference between dbt_project.yml and profiles.yml?
+dbt_project.yml is like application.yml in a spring boot project. it has the config like to see which things where, project name, its version, which ones to clean if clean command is given, and models configuration (live views or what...)
+*profiles.yml consists of the profile detail of the dataset handling the dbt project. like which gcp project belongs to, location, auth methos, which tool (like bigquery) and mostly about the dataset. (it is hidden under .dbt folder in the root path)
+
+What is the difference between a dbt model and a raw SQL query?
+dbt model focuses on arranging data according to the code in the models. we can create n number of models and have multiple views of the same data.
+*dbt model is a SELECT statement that dbt compiles and executes against the warehouse. The key difference is dbt manages dependencies, materializations, tests, and documentation around it. Raw SQL is just a query — no dependency tracking, no testing framework, no lineage.*
+
+What does ref() do and how is source() different?
+ref() refers to a model as a source whereas source() refers to a data source (dataset). source() takes data from the dataset and ref() takes data from a model created using source().
+*ref() also builds the DAG — dbt knows model B depends on model A because of ref('model_a'). This is how dbt determines execution order automatically. Without ref(), you'd have to manage order manually.
+
+What is the difference between a dbt view and a dbt table materialization?
+dbt view is a temporary table — not stored, queries relevant tables again on every access. dbt table materialization stores the result as a physical table, accessible without rerunning all queries.
+*Use view for staging, table for marts queried frequently by BI tools. Views are cheap to create but expensive to query. Tables are expensive to create but cheap to query.*
+
+Why does dbt separate staging models from mart models?
+Staging creates models from source using source(). Mart creates models from staging using ref(). That's why there is only source() in staging and only ref() in mart.
+*This separation means if the source table changes, you only update the staging model. All mart models that ref() staging automatically get the fix. Without staging, you'd update every mart model individually.
