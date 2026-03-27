@@ -3,8 +3,8 @@
     config(
         target_schema='ecommerce_dbt_snapshots',
         unique_key='CustomerId',
-        strategy='check',
-        check_cols=['Monetary', 'Frequency']
+        strategy='timestamp',
+        updated_at='LastPurchaseRecency'
     )
 }}
 SELECT

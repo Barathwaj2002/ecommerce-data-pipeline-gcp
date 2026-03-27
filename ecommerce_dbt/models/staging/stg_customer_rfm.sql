@@ -5,4 +5,4 @@ SELECT
   Frequency,
   LastPurchaseRecency
 FROM {{ source('ecommerce_data', 'customer_rfm') }}
-QUALIFY ROW_NUMBER() OVER (PARTITION BY CustomerId ORDER BY Monetary DESC) = 1
+QUALIFY ROW_NUMBER() OVER (PARTITION BY CustomerId ORDER BY Monetary DESC, LastPurchaseRecency DESC, CustomerId) = 1

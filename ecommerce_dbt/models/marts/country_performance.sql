@@ -12,6 +12,7 @@ customers as (
     group by Country
 )
 select
+    {{ dbt_utils.generate_surrogate_key(['p.Country','p.Description'])}} as row_id,
     p.Country,
     p.Description AS TopProduct,
     p.TotalRevenue,

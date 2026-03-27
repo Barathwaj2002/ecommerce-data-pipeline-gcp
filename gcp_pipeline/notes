@@ -36,3 +36,21 @@ CA: BigQuery charges by bytes scanned. Partitioning reduces bytes scanned by ski
 What is clustering in BigQuery and how is it different from partitioning?
 it organize data inside each partition with respect to any column other than partitioned one. it will lead to having similar values in a column of a partition and sort in a way that are closely similar values leading to faster search and reduced power consumption (cheaper)
 
+What is a surrogate key and why is it useful?
+usually a surrogate key is a unique key given to each rows to tackle duplicate values in same column (like if the table has no primary key). it usually works with combining 2 or more columns and creating a unique value (composite key).
+but in dbt it will get composite and also hashing the composite value. 
+*Natural keys (like CustomerID) can change or be reused across systems. Surrogate key is system-generated, never changes, and uniquely identifies a row regardless of source system changes. Essential in data warehouses where you merge data from multiple sources.
+
+What is the difference between dbt built-in tests and dbt_expectations tests?
+dbt built in tests are limited with not_null, unique and similar simple conditions. but with dbt_expectations, we can give arguments and customize the tests and there are also variety of tests like values between, length of the value and many (not aware abt others).
+*dbt_expectations is based on Great Expectations library — industry standard for data quality. Knowing both shows maturity in data quality practices.
+
+When would you use a singular test vs a schema test?
+singular tests involve getting results from a query. like if it returns something, it passes. it can be any query of our choice. 
+but schema tests work on conditions and not as flexible as query. it is used for standardizing the data and make it meet bare minimum expectation. 
+*Singular test fails if query returns ANY rows — not passes. It's the opposite of what you said. Logic is: write a query that finds bad data. If bad data exists, rows are returned, test fails.
+
+What does the lineage graph tell you that raw SQL can't?
+lineage graph give overall view of the model and in a visual manner that raw SQL can't. it is easy to understand and clearly defines the relationships between
+snapshots, stages and marts.
+*Also shows impact analysis — if source table changes, lineage immediately shows which staging and mart models are affected. Critical for debugging production issues.
