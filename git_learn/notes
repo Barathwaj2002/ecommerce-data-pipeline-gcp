@@ -46,6 +46,7 @@ rebase just overlaps all the commits of the target branch over the current's lat
 
 When would you use each in a team?
 in a team if we're working on different tasks, we use merge. if another team wants to takeover the existing one, the can do rebase.
+*too vague. Better: "Rebase for local feature branches before raising a PR — clean up your own commits. Merge for integrating completed features into main — preserves the record of what happened. Never rebase shared/public branches — it rewrites history others depend on."
 
 What is fast-forward merge?
 if there are 2 branches where 1 got diverged from another and if we proceed to make changes in the diverged branch... after some commits, we want it to be merged with the source branch and if there was no commits done in the source till now, it will make fast-forward where all those commits will be added to the source branch and pointed moved to the latest of source branch. if we strictly want the history along with it (the merge history and the branch history), we can use --no-ff flag to avoid fast-forwarding.
@@ -73,3 +74,21 @@ revert: creates new commit without the last commit.
 
 Why is hard reset dangerous on shared branches?
 it will delete the files permanently and is unrecoverable.
+
+Which workflow suits a 5-person startup vs a 100-person enterprise?
+for a 5 person startup, main and feature workflows are good enough.
+for a 100 person enterprise startup, since there will be many features, many versions of features and etc main, feature, hotfix, release, develop workflow may be required. like each branch for each release or feature...
+
+What is a Pull Request and what problem does it solve?
+when someone made any changes in the repo and we have to get updated to the latest push, we use git pull. it will get the latest versions of all files of the repo. it may cause issue when we have a working version of a file that's been updated in the pull. we can resolve the conflict like we discussed earlier.
+
+What does squash do in interactive rebase?
+we can selectively pick commits and squash rest leading to rewriting commit history with our approval.
+its like a combined meaningful commit with no extra commits. 
+
+What is the difference between squash and fixup?
+in squash we can have commit messages of all combined commits or we can edit it to our liking. but we should do it manually. 
+with fixup, it is automated to have commit message of the last commit and no need to edit.
+
+When would you use interactive rebase in a team workflow?
+when we're editing the commit history and want some and don't want some specifically. without interactive, it will just move the pointer and include everything. we could give HEAD~4 for last 4 or whatever... but still we can't pick specific commits without interactive. 
