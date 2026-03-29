@@ -42,6 +42,7 @@ creating branch is for actual files and not working ones. it doesn't solve the p
 What is the difference between merge and rebase?
 merge will merge the commits of the target branch with existing one along with the history too... leaving many under conflicts if any. now both history of commits and latest commit will be merged.
 rebase just overlaps all the commits of the target branch over the current's latest commit resulting is no conflicts but a lot of commit history
+*"rebase results in no conflicts" is wrong. Rebase can still have conflicts — you resolve them per commit as they're replayed. The difference is history shape, not conflict frequency. Fix: "Merge preserves full history with a merge commit showing where branches joined. Rebase replays commits linearly — cleaner history but rewrites commit hashes."
 
 When would you use each in a team?
 in a team if we're working on different tasks, we use merge. if another team wants to takeover the existing one, the can do rebase.
@@ -54,3 +55,21 @@ when i want to get a particular commit and not other history or future related t
 
 What's the risk of cherry-picking frequently?
 the risk of cherry-pick when used frequently is that we may lose track of history and a lot of confusion may arrive in the main branch between versions.
+
+What do the markers mean?
+markers is used to represent the versions of the conflict. like the branch name and the separation between conflicts. we can remove it and save to resolve the conflicts.
+
+What is git merge --abort and when would you use it?
+when we are unsure of which version of the conflict to keep, we can abort the merge and can do it later.
+
+Difference between soft, mixed, hard reset?
+soft: uncommits and bring back the changes to the staging area.
+mixed: uncommits but doesn't bring back to staging area. we need to add again
+hard: uncommits and also deletes from local
+
+Difference between reset and revert?
+reset: deletes the last commit.
+revert: creates new commit without the last commit.
+
+Why is hard reset dangerous on shared branches?
+it will delete the files permanently and is unrecoverable.
