@@ -1,0 +1,20 @@
+What does Cloud Composer manage that you had to do manually?
+deploying airflow pod, manage rbac, use gcs for dag storage, use cloud sql (postgresql) for metadata db for airflow, install kubectl, handle pod  restarts, auto scale workers
+
+Why is PostgreSQL better than SQLite for production Airflow?
+SQLite doesn't run on servers and is very basic compared to PostgreSQL. including the mvcc and many things postgres is better and for airflow postgres is the gold standard.
+
+Where are DAGs stored in Composer and how do they get picked up?
+DAGs are stored in buckets inside dags folder and it is automatically synced into airflow by the composer
+
+Why is trigger_rule="all_done" on delete_cluster?
+so that even if a task fail, the cluster will get deleted
+
+What is {{ ds_nodash }} in the cluster name?
+it will give execution date and time with structured hyphens
+
+Why create and delete cluster per DAG run instead of keeping one running?
+composer clusters are expensive and need to be deleted to avoid high costs unnecessarily
+
+What is the difference between Composer 2 and 3?
+commposer 2 is the previous generation and only require service account as optional, networking is more stricter in composer 3

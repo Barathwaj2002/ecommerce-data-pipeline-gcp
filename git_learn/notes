@@ -92,3 +92,33 @@ with fixup, it is automated to have commit message of the last commit and no nee
 
 When would you use interactive rebase in a team workflow?
 when we're editing the commit history and want some and don't want some specifically. without interactive, it will just move the pointer and include everything. we could give HEAD~4 for last 4 or whatever... but still we can't pick specific commits without interactive. 
+
+What is git reflog and how is it different from git log?
+reflog keeps everything recorded even the deleted branches, reset commits etc... wheread git log only has the active commits and the intended history.
+
+How long does reflog keep entries?
+90 days for reachable commits, 30days for unreachable ones where rebase, reset are used. 
+
+When would reflog save you in a real situation?
+when i accidentally delete a branch, hard reset something reflogs helps but only within the date range of the reflog.
+
+What algorithm does git bisect use?
+it uses binary search for making it insanely efficient.
+
+Why is bisect faster than checking commits one by one?
+because it uses binary search. for 100 commits, it will first check 50th commit, then 25th, then 12th, then 6th, then 3rd, then 2nd. total just 7 commits in the worst case. 
+
+What is git fetch vs git pull?
+fetch will download all objects from the origin main and save it in .git/ folder. we can use git diff origin/main to inspect the differences and latest files.
+
+What is git remote -v and what does it show?
+it will give the address (in and out) of the pull, fetch and push
+
+What does git stash pop vs git stash apply do differently?
+git stash pop will delete last stash, git stash apply will get the changes to the local and we can add it to staging area for commit.
+
+What is a .gitignore file and how does it work?
+it will get a list of file extensions (like .jpg, dockerfile, etc...) and ignore those type of files from getting recognized by git for any manipulation or commit.
+
+What does git clean -fd do?
+it will remove all untracked files from local

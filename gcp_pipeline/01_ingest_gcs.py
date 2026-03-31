@@ -32,7 +32,7 @@ def clean_data(df):
 def write_parquet_to_gcs(client, df, bucket_name, blob_path):
     print(f"Writing cleaned data to gcs://{bucket_name}/{blob_path}")
     buffer = io.BytesIO()
-    df.to_parquet(buffer, index=False)
+    df.to_parquet(buffer, index=False, coerce_timestamps='us', allow_truncated_timestamps=True)
     buffer.seek(0)
     bucket = client.bucket(bucket_name)
     blob = bucket.blob(blob_path)
