@@ -1,0 +1,10 @@
+ecommerce_dbt:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: oauth
+      project: ecommerce-pipeline-490613
+      dataset: ecommerce_dbt_dev
+      location: asia-south1
+      threads: 1
