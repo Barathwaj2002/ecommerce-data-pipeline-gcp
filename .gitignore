@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+
+# dbt
+ecommerce_dbt/target/
+ecommerce_dbt/dbt_packages/
+ecommerce_dbt/logs/
+
+# GCP credentials
+*.json
+*-key.json
+
+# Local data
+ingestion/processed_data/
+data/
+
+# IDE
+.vscode/
+.idea/
