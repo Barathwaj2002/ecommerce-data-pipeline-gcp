@@ -43,18 +43,18 @@ jobs:
                 push: true
                 tags: ${{ secrets.DOCKER_USERNAME }}/ingestion:latest
                 context: .
-                file: ./deployment/ingestion/Dockerfile
+                file: ./deployment/docker-images/Dockerfile-ingestion
             - name: build and push pyspark
               uses: docker/build-push-action@v7
               with:
                 push: true
                 tags: ${{ secrets.DOCKER_USERNAME }}/pyspark:latest
                 context: .
-                file: ./deployment/pyspark/Dockerfile
+                file: ./deployment/docker-images/Dockerfile-pyspark
             - name: build and push airflow
               uses: docker/build-push-action@v7
               with:
                 push: true
                 tags: ${{ secrets.DOCKER_USERNAME }}/airflow-custom:latest
                 context: .
-                file: ./Dockerfile.airflow
+                file: ./deployment/docker-images/Dockerfile.airflow

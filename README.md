@@ -17,8 +17,9 @@ ecommerce-data-pipeline-self/
 │   ├── dbt-test.yml           # dbt deps + dbt test on push/PR
 ├── airflow-dags/              # Airflow DAGs and k8s job YAMLs
 ├── deployment/k8s/            # Kubernetes deployment manifests
-├── deployment/ingestion/      # Ingestion Dockerfile
-├── deployment/pyspark/        # PySpark Dockerfile
+├── deployment/docker-images/Dockerfile-ingestion       # Ingestion Dockerfile
+├── deployment/docker-images/Dockerfile-pypspark        # PySpark Dockerfile
+├── deployment/docker-images/Dockerfile.airflow        # Airflow Dockerfile
 ├── ecommerce_dbt/             # dbt project (staging, marts, tests, snapshots)
 ├── gcp_pipeline/              # GCP pipeline scripts and Composer DAG
 ├── processing/                # PySpark transformation scripts
