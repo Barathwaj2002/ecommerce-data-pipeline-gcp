@@ -31,9 +31,9 @@ def validate_data(df, stage_name):
     if len(nulls_found) > 0:
         logger.warning("Null value found: %s", nulls_found.to_dict())
     
-    if(df['Quantity'] <= 0).any():
+    if (df['Quantity'] <= 0).any():
         raise ValueError("Negative or zero Quantity values found at %s", stage_name)
-    if(df['UnitPrice'] <= 0).any():
+    if (df['UnitPrice'] <= 0).any():
         raise ValueError("Negative or zero UnitPrice values found at %s", stage_name)
 
     logger.info("Validation passed at stage: %s", stage_name)
